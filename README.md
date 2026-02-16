@@ -1,185 +1,134 @@
 # Butter - Guide de Restaurants de Paris
 
-Site web pour [Butter](https://apps.apple.com/fr/app/butter-guide-de-restaurants/id6749227938), une application mobile qui permet de découvrir les meilleurs restaurants de Paris.
+Site web pour [Butter](https://apps.apple.com/fr/app/butter-guide-de-restaurants/id6749227938), une application mobile qui permet de decouvrir les meilleurs restaurants de Paris.
 
-## 📱 À propos
+## Technologies
 
-Butter est un guide curaté des meilleurs restaurants de Paris. Ce site web présente l'application et permet de découvrir les guides de restaurants organisés par thèmes (Manger au comptoir, Italiens niche, Fast & Healthy, etc.).
-
-## 🚀 Technologies utilisées
-
-- **React 18** avec **TypeScript**
-- **Vite** - Build tool et dev server
-- **React Router** - Routing côté client
-- **Tailwind CSS** - Styling
-- **shadcn/ui** - Composants UI basés sur Radix UI
-- **Supabase** - Backend (base de données et storage)
-- **Firebase Storage** - Stockage d'images
-- **React Query** - Gestion des données
+- **React 18** + **TypeScript** + **Vite**
+- **React Router** - Routing SPA
+- **Tailwind CSS** + **shadcn/ui** - UI
+- **Supabase** - Base de donnees, Auth, Storage
+- **Firebase Storage** - Images restaurants (URLs generees par tags)
+- **React Query** - Cache & fetching
 - **xlsx** - Import/Export Excel
+- **qrcode.react** - QR code App Store
 
-## 📦 Installation
+## Installation
 
 ```bash
-# Installer les dépendances
+# Copier et remplir les variables d'environnement
+cp .env.example .env
+
+# Installer les dependances
 npm install
 
-# Lancer le serveur de développement
+# Lancer en dev
 npm run dev
 
-# Build pour la production
+# Build production
 npm run build
-
-# Preview du build
-npm run preview
 ```
 
-Le serveur de développement sera accessible sur `http://localhost:8080`
+Dev server sur `http://localhost:8080`
 
-## 🏗️ Structure du projet
+## Structure du projet
 
 ```
-lovable-import/
-├── src/
-│   ├── components/        # Composants React réutilisables
-│   │   ├── ui/            # Composants shadcn/ui
-│   │   ├── Navigation.tsx
-│   │   ├── Hero.tsx
-│   │   ├── Footer.tsx
-│   │   └── ...
-│   ├── pages/             # Pages de l'application
-│   │   ├── Index.tsx       # Page d'accueil
-│   │   ├── Guides.tsx      # Liste des guides
-│   │   ├── Admin.tsx       # Back-office
-│   │   └── ...
-│   ├── lib/                # Utilitaires et gestion de données
-│   │   ├── dataManager.ts  # Gestion Supabase/localStorage
-│   │   ├── firebase.ts     # Configuration Firebase
-│   │   └── utils.ts        # Fonctions utilitaires
-│   ├── hooks/              # React hooks personnalisés
-│   ├── integrations/       # Intégrations externes
-│   │   └── supabase/       # Client Supabase
-│   └── types/              # Types TypeScript
-├── supabase/
-│   ├── functions/          # Supabase Edge Functions
-│   │   ├── import-image/   # Import d'images depuis URL
-│   │   └── upload-photo/    # Upload de photos
-│   └── config.toml         # Configuration Supabase
-└── public/                 # Assets statiques
+src/
+  components/
+    ui/                     # shadcn/ui (42 composants)
+    Navigation.tsx          # Barre de navigation
+    Hero.tsx                # Hero page d'accueil
+    Footer.tsx              # Footer avec QR code, reseaux sociaux
+    ErrorBoundary.tsx       # Error boundary React
+    ProtectedRoute.tsx      # Garde de route (auth requise)
+    DynamicGuidePage.tsx    # Page guide dynamique (depuis Supabase)
+    GuidesCategories.tsx    # Grille des guides publies
+    GuidesHero.tsx          # Hero page guides
+    OtherGuides.tsx         # Section "Autres guides"
+    FileUpload.tsx          # Upload de fichiers
+    PhotoLibrary.tsx        # Bibliotheque de photos
+  pages/
+    Index.tsx               # Accueil
+    App.tsx                 # Presentation de l'app mobile
+    Contact.tsx             # Formulaire de contact
+    Guides.tsx              # Liste des guides (masquee pour l'instant)
+    MangerAuComptoir.tsx    # Guide statique (legacy)
+    Admin.tsx               # Back-office complet
+    Login.tsx               # Connexion admin
+    MentionsLegales.tsx     # Mentions legales
+    PolitiqueConfidentialite.tsx  # Politique RGPD
+    NotFound.tsx            # 404
+  hooks/
+    useAuth.tsx             # Contexte auth Supabase
+    use-toast.ts            # Notifications toast
+    use-mobile.tsx          # Detection mobile
+  lib/
+    dataManager.ts          # CRUD Supabase (restaurants, guides)
+    firebase.ts             # Config Firebase Storage
+    utils.ts                # Utilitaires
+  integrations/
+    supabase/
+      client.ts             # Client Supabase (env vars)
+      types.ts              # Types generes
+  types/
+    admin.ts                # Types Restaurant, Guide
+supabase/
+  migrations/
+    20260216_add_rls_policies.sql  # RLS (a executer manuellement)
+  functions/
+    import-image/           # Edge Function import image URL
+    upload-photo/           # Edge Function upload photo
+public/
+  robots.txt
+  sitemap.xml
 ```
 
-## 🎯 Fonctionnalités
+## Routes
 
-### Pages publiques
+| Route | Page | Statut |
+|-------|------|--------|
+| `/` | Accueil | Active |
+| `/app` | Presentation app mobile | Active |
+| `/contact` | Formulaire de contact | Active |
+| `/login` | Connexion admin | Active |
+| `/admin` | Back-office (protege) | Active |
+| `/mentions-legales` | Mentions legales | Active |
+| `/politique-de-confidentialite` | Politique de confidentialite | Active |
+| `/guides` | Liste des guides | Masquee |
+| `/guides/:slug` | Guide dynamique | Masquee |
 
-- **Page d'accueil** (`/`) - Présentation de l'application
-- **Guides** (`/guides`) - Liste des guides de restaurants
-- **Guide dynamique** (`/guides/:guideSlug`) - Détails d'un guide
-- **App** (`/app`) - Présentation de l'application mobile
-- **Contact** (`/contact`) - Formulaire de contact
+## Variables d'environnement
 
-### Back-office (`/admin`)
-
-- **Gestion des restaurants**
-  - Import depuis Excel
-  - Ajout/Modification/Suppression
-  - Gestion des photos (5 images par restaurant)
-  - Génération automatique d'URLs Firebase basées sur les tags
-  - Import de photos en lot
-
-- **Gestion des guides**
-  - Création/Modification/Suppression
-  - Publication/Dépublication
-  - Association de restaurants
-  - Photo de couverture
-
-- **Bibliothèque de photos**
-  - Upload vers Supabase Storage
-  - Import depuis URL
-  - Export vers Excel
-
-## 🔧 Configuration
-
-### Variables d'environnement
-
-Créez un fichier `.env` à la racine du projet avec :
+Voir `.env.example` pour la liste complete :
 
 ```env
-# Supabase
-VITE_SUPABASE_URL=https://qrgwozkpsukggbbhfajc.supabase.co
-VITE_SUPABASE_ANON_KEY=votre_cle_publique
-
-# Firebase (optionnel, pour génération d'URLs)
-VITE_FIREBASE_API_KEY=votre_cle_api
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
 ```
 
-### Supabase
+## Securite
 
-Le projet utilise Supabase pour :
-- Stockage des restaurants et guides
-- Supabase Storage pour les photos
-- Edge Functions pour l'upload et l'import d'images
+- **Auth** : Supabase Auth (email/password) pour `/admin`
+- **RLS** : Row Level Security sur les tables `restaurants` et `guides`
+- **Env vars** : Cles API dans `.env`, jamais commitees
 
-Les fonctions Edge sont dans `supabase/functions/` et peuvent être déployées avec :
+## Deploiement
 
-```bash
-supabase functions deploy import-image
-supabase functions deploy upload-photo
-```
+Heberge sur **Vercel** avec `vercel.json` pour le routing SPA.
 
-## 📝 Gestion des données
-
-### Restaurants
-
-Les restaurants sont stockés dans Supabase avec :
-- Informations de base (nom, adresse, description, etc.)
-- Tags pour la génération automatique d'URLs d'images
-- 5 images générées automatiquement depuis Firebase Storage (TAG2.png à TAG6.png)
-- Logo généré automatiquement (TAG1.png)
-
-### Guides
-
-Les guides contiennent :
-- Titre et description
-- Liste de restaurants associés
-- Photo de couverture
-- Statut de publication
-
-### Génération d'URLs d'images
-
-Le système génère automatiquement les URLs Firebase Storage basées sur les tags des restaurants :
-- Logo : `Logos/TAG1.png`
-- Photos : `Photos restaurants/TAG2.png` à `TAG6.png`
-- Couverture de guide : `Photos restaurants/filename.webp`
-
-## 🎨 Design System
-
-Le projet utilise Tailwind CSS avec un design system personnalisé défini dans `src/index.css` :
-- Variables CSS pour les couleurs (light/dark mode)
-- Composants shadcn/ui pour l'UI
-- Animations personnalisées
-
-## 📱 Lien App Store
-
-Tous les boutons de téléchargement pointent vers :
-https://apps.apple.com/fr/app/butter-guide-de-restaurants/id6749227938
-
-## 🛠️ Scripts disponibles
-
-- `npm run dev` - Lance le serveur de développement
-- `npm run build` - Build pour la production
-- `npm run build:dev` - Build en mode développement
-- `npm run lint` - Vérifie le code avec ESLint
-- `npm run preview` - Preview du build de production
-
-## 📄 Licence
-
-Copyright © 2025 T'as envie de quoi, SAS
-
-## 🔗 Liens
+## Liens
 
 - [App Store](https://apps.apple.com/fr/app/butter-guide-de-restaurants/id6749227938)
-- Instagram: [@butterguide](https://instagram.com/butterguide)
-- TikTok: [@butterguide](https://tiktok.com/@butterguide)
-- Contact: contact@butterguide.com
+- [Instagram](https://instagram.com/butterguide)
+- [TikTok](https://tiktok.com/@butterguide)
+- [LinkedIn](https://www.linkedin.com/company/butterappli)
+- Contact : contact@butterguide.com
 
+Copyright 2025 T'as envie de quoi, SAS

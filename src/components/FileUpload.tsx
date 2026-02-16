@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,19 +10,31 @@ interface FileUploadProps {
 
 const FileUpload: React.FC<FileUploadProps> = ({ onUpload, currentUrl }) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+    };
+  }, [blobUrl]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
       setIsUploading(true);
-      // Simuler un upload - en production, vous utiliseriez votre service d'upload
-      const fakeUrl = URL.createObjectURL(file);
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+      const newUrl = URL.createObjectURL(file);
+      setBlobUrl(newUrl);
       setTimeout(() => {
-        onUpload(fakeUrl);
+        onUpload(newUrl);
         setIsUploading(false);
-      }, 1000);
+      }, 500);
     }
-  }, [onUpload]);
+  }, [onUpload, blobUrl]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -33,6 +45,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUpload, currentUrl }) => {
   });
 
   const clearImage = () => {
+    if (blobUrl) {
+      URL.revokeObjectURL(blobUrl);
+      setBlobUrl(null);
+    }
     onUpload('');
   };
 
@@ -40,9 +56,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUpload, currentUrl }) => {
     <div className="space-y-2">
       {currentUrl ? (
         <div className="relative">
-          <img 
-            src={currentUrl} 
-            alt="Uploaded" 
+          <img
+            src={currentUrl}
+            alt="Photo uploadée"
             className="w-full h-32 object-cover rounded-lg border"
           />
           <Button
@@ -79,4 +95,3 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUpload, currentUrl }) => {
 };
 
 export default FileUpload;
-

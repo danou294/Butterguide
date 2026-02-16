@@ -35,15 +35,8 @@ const Hero = () => {
           </p>
         </div>
         {/* Deux boutons côte à côte avec plus d'espace */}
-        <div className="flex flex-col sm:flex-row gap-12 justify-center items-center" style={{ marginTop: '62px' }}>
-          <button 
-            onClick={() => navigate('/guides')}
-            className="bg-[#f1f0ea] bg-opacity-90 text-black px-6 py-3 rounded-xl text-base font-medium hover:bg-gray-200 hover:bg-opacity-80 transition-colors min-w-[140px]"
-          >
-            Explore nos guides
-          </button>
-          
-          <button 
+        <div className="flex justify-center" style={{ marginTop: '62px' }}>
+          <button
             onClick={() => navigate('/app')}
             className="bg-[#f1f0ea] bg-opacity-90 text-black px-6 py-3 rounded-xl text-base font-medium hover:bg-gray-200 hover:bg-opacity-80 transition-colors min-w-[140px]"
           >
